@@ -17,11 +17,13 @@
  * Define Global Variables
  *
 */
-let sections = document.getElementsByTagName('section');
-let menuItems = [];
-let navMenu_List = document.querySelector('#navbar__list');
-let currentScrollPos = 0;
-let scrollHeights = [];
+let sections = document.getElementsByTagName('section'),
+  menuItems = [],
+  navMenu_List = document.querySelector('#navbar__list'),
+  currentScrollPos = 0,
+  ticking = false,
+  scrollHeights = [],
+  activeSection = '';
 
 /**
  * End Global Variables
@@ -32,10 +34,8 @@ let scrollHeights = [];
 // Set section start and end scroll heights
 function setSectionScroll() {
   for (section of sections) {
-    let start = window.pageYOffset || section.scrollTop;
-    console.log('start: ', start);
+    let start = section.offsetTop;
     let end = start + section.offsetHeight;
-    console.log('end: ', end);
     scrollHeights.push({
       start: start,
       end: end,
@@ -46,13 +46,30 @@ function setSectionScroll() {
 
 // Add active state to menu items if scroll offset falls on corresponding section
 function scrollActive(event) {
-  currentScrollPos = window.scrollY;
+  currentScrollPos = window.scrollY + document.querySelector('.page__header').offsetHeight;
   for (scrollHeight of scrollHeights) {
-    if (currentScrollPos >= scrollHeight.start || currentScrollPos <= scrollHeight.end) {
+    if (currentScrollPos >= scrollHeight.start && currentScrollPos <= scrollHeight.end) {
       // TO-DO: ADD ACTIVE STATE TO MENU ITEMS AND SECTIONS
+      if (activeSection == scrollHeight['section']) {
+        break;
+      } else {
+        activeSection = scrollHeight['section'];
+        addActive(activeSection);
+      }
     }
   }
-  console.log(window.scrollY);
+}
+
+function addActive(section) {
+  let activeEls = document.querySelectorAll('.active');
+  let sectionsActive = document.querySelectorAll('[data-nav="' + section.getAttribute('data-nav') + '"]');
+  for (activeEl of activeEls) {
+    activeEl.className = activeEl.className.replace('active','');
+  }
+  for (sectionActive of sectionsActive) {
+    sectionActive.classList += ' active';
+  }
+
 }
 
 /**
@@ -76,7 +93,7 @@ function buildNav() {
   for (menuItem of menuItems) {
     const navItem = document.createElement('li');
     const navLink = document.createElement('a');
-    navLink.setAttribute('data-nav', menuItem.id);
+    navLink.setAttribute('data-nav', menuItem.label);
     if (menuItems.indexOf(menuItem) === 0) {
       navLink.setAttribute('class', 'menu__link active');
     } else {
@@ -89,20 +106,13 @@ function buildNav() {
 }
 
 // Add class 'active' to section when near top of viewport
-function addActive(event) {
-  let activeEls = document.querySelectorAll('.active');
-  let sectionActive = document.querySelector(event.target.getAttribute('data-nav'));
-  for (activeEl of activeEls) {
-    activeEl.className = activeEl.className.replace('active','');
-  }
-  event.target.classList += ' active';
-  sectionActive.classList += 'active';
+function activeHandler(event) {
+  addActive(event.target);
 }
 
 // Scroll to anchor ID using scrollTO event
 function scrollAnchor(event) {
-  let anchorEl = document.getElementById(event.target.getAttribute('data-nav').replace('#',''));
-  console.log(event.target);
+  let anchorEl = document.querySelector('section[data-nav="' + event.target.getAttribute('data-nav') + '"]');
   anchorEl.scrollIntoView({
     behavior: 'smooth'
   })
@@ -124,7 +134,7 @@ window.onload = function() {
 navMenu_List.addEventListener('click', scrollAnchor, false);
 
 // Set sections and links as active on click
-navMenu_List.addEventListener('click', addActive);
+navMenu_List.addEventListener('click', activeHandler);
 
 
 
@@ -134,5 +144,8 @@ window.addEventListener('scroll', function(e) {
   if (currentScrollPos > window.height) {
     showScrollToTop();
   }
-  // TO-DO: Add setSectionScroll() and figure out extra parameter based on https://www.html5rocks.com/en/tutorials/speed/animations/
+  // TO-DO: Add scrollActive() and figure out extra parameter based on https://www.html5rocks.com/en/tutorials/speed/animations/
+  if (!ticking) {
+    scrollActive();
+  }
 });
