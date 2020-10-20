@@ -21,7 +21,6 @@ let sections = document.getElementsByTagName('section'),
   menuItems = [],
   navMenu_List = document.querySelector('#navbar__list'),
   currentScrollPos = 0,
-  ticking = false,
   scrollHeights = [],
   activeSection = '';
 
@@ -137,15 +136,10 @@ navMenu_List.addEventListener('click', scrollAnchor, false);
 navMenu_List.addEventListener('click', activeHandler);
 
 
-
 // Set sections and links as active on scroll, show scroll to top button below the fold
 window.addEventListener('scroll', function(e) {
   currentScrollPos = window.scrollY;
   if (currentScrollPos > window.height) {
     showScrollToTop();
-  }
-  // TO-DO: Add scrollActive() and figure out extra parameter based on https://www.html5rocks.com/en/tutorials/speed/animations/
-  if (!ticking) {
-    scrollActive();
   }
 });
