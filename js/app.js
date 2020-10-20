@@ -137,9 +137,4 @@ navMenu_List.addEventListener('click', activeHandler);
 
 
 // Set sections and links as active on scroll, show scroll to top button below the fold
-window.addEventListener('scroll', function(e) {
-  currentScrollPos = window.scrollY;
-  if (currentScrollPos > window.height) {
-    showScrollToTop();
-  }
-});
+window.addEventListener('scroll', scrollActive);
